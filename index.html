@@ -1,70 +1,317 @@
-<!DOCTYPE html><html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ObriChat - PossaniX</title>
-  <style>
-    * { box-sizing: border-box; }
-    body, html {
-      margin: 0; padding: 0; height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #1e3c72, #2aaf6e); color: #fff;
-      display: flex; justify-content: center; align-items: center;
-    }
-    #welcome-screen, #app-container {
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 20px;
-      width: 320px;
-      max-width: 90vw;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #welcome-screen p {
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    #user-number-display {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 10px 0 20px 0;
-      letter-spacing: 2px;
-      user-select: all;
-      background: rgba(255 255 255 / 0.15);
-      padding: 8px 15px;
-      border-radius: 10px;
-    }
-    button {
-      background: #2aaf6e;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #002b1a;
-      font-size: 16px;
-      transition: background 0.3s ease;
-      width: 100%;
-    }
-    button:hover {
-      background: #1e8e58;
-    }
-    #google-btn {
-      background: white;
-      color: #1e3c72;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ObriChat - PossaniX</title>
+<style>
+  /* CSS simplificado para foco no funcionamento */
+  body, html {
+    margin:0; padding:0; height:100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #1e3c72, #2aaf6e); color: #fff;
+    display: flex; justify-content: center; align-items: center;
+  }
+  #welcome-screen, #app-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px;
+    max-width: 90vw;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #welcome-screen {
+    text-align: center;
+  }
+  #user-number-display, #user-email-display {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0 20px 0;
+    letter-spacing: 2px;
+    user-select: all;
+    background: rgba(255 255 255 / 0.15);
+    padding: 8px 15px;
+    border-radius: 10px;
+    width: 100%;
+    word-wrap: break-word;
+  }
+  button {
+    background: #2aaf6e;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #002b1a;
+    font-size: 16px;
+    transition: background 0.3s ease;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  button:hover {
+    background: #1e8e58;
+  }
+  #app-container {
+    display: none;
+    height: 90vh;
+    width: 90vw;
+    max-width: 900px;
+    flex-direction: row;
+    color: #fff;
+  }
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    background: #1e3c72;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-radius: 12px 0 0 12px;
+  }
+  #profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #profile img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 8px;
+    border: 2px solid #2aaf6e;
+    background: #333;
+  }
+  #profile-number, #profile-email {
+    font-weight: bold;
+    font-size: 14px;
+    user-select: text;
+    text-align: center;
+    word-break: break-word;
+  }
+  #contacts-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+  #contacts-list button {
+    background: none;
+    border: none;
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #contacts-list button img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #555;
+    flex-shrink: 0;
+  }
+  #add-contact {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #add-contact input {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+  }
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #1e3c72, #2aaf6e);
+    border-radius: 0 12px 12px 0;
+    overflow: hidden;
+  }
+  #header {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+  }
+  #sub-header {
+    font-size: 14px;
+    color: #c1e9de;
+    padding-left: 15px;
+    height: 22px;
+    background: rgba(0,0,0,0.2);
+  }
+  #chat {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.15);
+    user-select: text;
+  }
+  .msg {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 70%;
+    display: inline-block;
+    word-wrap: break-word;
+  }
+  .me {
+    background: #2aaf6e;
+    margin-left: auto;
+    color: #002b1a;
+  }
+  .other {
+    background: #1e3c72;
+    margin-right: auto;
+    color: #c1e9de;
+  }
+  #input-area {
+    display: flex;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    gap: 10px;
+  }
+  #msg-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+  }
+  #send-btn {
+    background: #2aaf6e;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #002b1a;
+  }
+  /* Modal perfil */
+  #profile-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #profile-modal .modal-content {
+    background: #1e3c72;
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px;
+    max-width: 90vw;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    user-select: text;
+  }
+  #profile-modal .modal-content img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2aaf6e;
+  }
+  #profile-modal textarea {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    resize: none;
+    background: rgba(255 255 255 / 0.1);
+    color: #fff;
+    outline: none;
+  }
+  #profile-modal .close-btn {
+    background: #2aaf6e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #002b1a;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+</style>
 </head>
 <body>
+
+  <!-- Tela de boas vindas -->
   <div id="welcome-screen">
     <p>Bem-vindo ao ObriChat!</p>
-    <p>Seu número gerado é:</p>
-    <div id="user-number-display"></div>
-    <button id="enter-btn">Entrar com número</button>
-    <button id="google-btn">Entrar com Google</button>
-  </div>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>  <script>
+    <p>Faça login ou use um número gerado:</p>
+    <div id="user-number-display" style="display:none;"></div>
+    <div id="user-email-display" style="display:none;"></div>
+    <button id="google-login-btn">Login com Google</button>
+    <button id="number-login-btn">Entrar com número gerado</button>
+  </div>
+
+  <!-- App principal -->
+  <div id="app-container">
+    <div id="sidebar">
+      <div id="profile" title="Clique para ver seu perfil">
+        <img id="profile-img" src="" alt="Foto de perfil" />
+        <div id="profile-number"></div>
+        <div id="profile-email"></div>
+      </div>
+      <div id="contacts-list"></div>
+      <div id="add-contact">
+        <input id="contact-name" placeholder="Nome do contato" />
+        <input id="dest-number" placeholder="Número (555) 123-4567" />
+        <button id="add-contact-btn">Adicionar Contato</button>
+      </div>
+    </div>
+    <div id="main">
+      <div id="header">ObriChat</div>
+      <div id="sub-header"></div>
+      <div id="chat"></div>
+      <div id="input-area" style="display:none;">
+        <input id="msg-input" placeholder="Digite sua mensagem..." />
+        <button id="send-btn">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal do perfil -->
+  <div id="profile-modal">
+    <div class="modal-content">
+      <img id="modal-profile-img" src="" alt="Foto do perfil" />
+      <div><strong>Número:</strong> <span id="modal-profile-number"></span></div>
+      <div><strong>Email:</strong> <span id="modal-profile-email"></span></div>
+      <textarea id="modal-bio" placeholder="Digite sua bio..."></textarea>
+      <button class="close-btn">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
       authDomain: "obrichat-4c631.firebaseapp.com",
@@ -75,51 +322,143 @@
       appId: "1:587921807769:web:386f5370030c1dc8931b08"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
     const auth = firebase.auth();
+    const db = firebase.database();
 
+    // Elementos DOM
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const appContainer = document.getElementById("app-container");
     const userNumberDisplay = document.getElementById("user-number-display");
-    const enterBtn = document.getElementById("enter-btn");
-    const googleBtn = document.getElementById("google-btn");
+    const userEmailDisplay = document.getElementById("user-email-display");
+    const googleLoginBtn = document.getElementById("google-login-btn");
+    const numberLoginBtn = document.getElementById("number-login-btn");
+    const profileNumber = document.getElementById("profile-number");
+    const profileEmail = document.getElementById("profile-email");
+    const profileImg = document.getElementById("profile-img");
+    const modalProfileImg = document.getElementById("modal-profile-img");
+    const modalProfileNumber = document.getElementById("modal-profile-number");
+    const modalProfileEmail = document.getElementById("modal-profile-email");
+    const profileModal = document.getElementById("profile-modal");
+    const modalBio = document.getElementById("modal-bio");
+    const closeBtn = document.querySelector(".close-btn");
+    const contactsList = document.getElementById("contacts-list");
+    const contactNameInput = document.getElementById("contact-name");
+    const destNumberInput = document.getElementById("dest-number");
+    const addContactBtn = document.getElementById("add-contact-btn");
+    const header = document.getElementById("header");
+    const subHeader = document.getElementById("sub-header");
+    const chatDiv = document.getElementById("chat");
+    const inputArea = document.getElementById("input-area");
+    const msgInput = document.getElementById("msg-input");
+    const sendBtn = document.getElementById("send-btn");
 
-    // Entrar com número aleatório
-    enterBtn.onclick = () => {
-      let userNumber = localStorage.getItem("userNumber");
-      if (!userNumber) {
-        userNumber = "(555) " + Math.floor(100 + Math.random() * 900) + "-" + Math.floor(1000 + Math.random() * 9000);
-        localStorage.setItem("userNumber", userNumber);
-      }
-      userNumberDisplay.textContent = userNumber;
-      localStorage.setItem("entered", "true");
-      location.reload();
-    };
+    // Estado usuário
+    let user = null;
+    let userNumber = null;
+    let userEmail = null;
+    let currentDest = "";
+    let savedContacts = JSON.parse(localStorage.getItem("savedContacts") || "[]");
 
-    // Login com Google
-    googleBtn.onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          const user = result.user;
-          const userData = {
-            uid: user.uid,
-            name: user.displayName,
-            email: user.email,
-            photo: user.photoURL
-          };
-          localStorage.setItem("userNumber", user.uid);
-          db.ref("users/" + user.uid).update(userData);
-          localStorage.setItem("entered", "true");
-          location.reload();
-        })
-        .catch(error => {
-          alert("Erro no login: " + error.message);
-        });
-    };
-
-    // Exibir número se já entrou
-    const existing = localStorage.getItem("userNumber");
-    if(existing){
-      userNumberDisplay.textContent = existing;
+    // Gera número random
+    function generateUserNumber(){
+      return "(555) " + Math.floor(100 + Math.random()*900) + "-" + Math.floor(1000 + Math.random()*9000);
     }
-  </script></body>
-</html>
+
+    // Função para mostrar perfil no sidebar e modal
+    function showUserProfile(){
+      if(userEmail){ 
+        profileEmail.textContent = userEmail;
+        modalProfileEmail.textContent = userEmail;
+        userNumber = localStorage.getItem("userNumber") || "Sem número";
+        profileNumber.textContent = userNumber;
+        modalProfileNumber.textContent = userNumber;
+      } else {
+        profileNumber.textContent = userNumber;
+        modalProfileNumber.textContent = userNumber;
+        profileEmail.textContent = "";
+        modalProfileEmail.textContent = "";
+      }
+      // Foto
+      db.ref("users/" + (userEmail || userNumber)).once("value", snap => {
+        const data = snap.val();
+        if(data && data.photo) {
+          profileImg.src = data.photo;
+          modalProfileImg.src = data.photo;
+          modalBio.value = data.bio || "";
+        } else {
+          profileImg.src = "https://via.placeholder.com/80x80?text=Usuário";
+          modalProfileImg.src = "https://via.placeholder.com/120x120?text=Usuário";
+          modalBio.value = "";
+        }
+      });
+    }
+
+    // Mostrar lista contatos
+    function updateContactsList(){
+      contactsList.innerHTML = "";
+      savedContacts.forEach(c => {
+        const btn = document.createElement("button");
+        const img = document.createElement("img");
+        img.src = "https://via.placeholder.com/28x28?text=...";
+        btn.appendChild(img);
+        btn.appendChild(document.createTextNode(`${c.name} — ${c.number}`));
+        db.ref("users/" + c.number).once("value", snap => {
+          const data = snap.val();
+          if(data && data.photo) img.src = data.photo;
+        });
+        btn.onclick = () => {
+          currentDest = c.number;
+          header.textContent = c.name;
+          loadMessages();
+          updateStatusListener(currentDest);
+        };
+        contactsList.appendChild(btn);
+      });
+    }
+
+    // Adicionar contato
+    function addContact(name, number){
+      if(!savedContacts.some(c => c.number === number)){
+        savedContacts.push({name, number});
+        localStorage.setItem("savedContacts", JSON.stringify(savedContacts));
+        updateContactsList();
+      }
+    }
+
+    addContactBtn.onclick = () => {
+      const name = contactNameInput.value.trim();
+      const number = destNumberInput.value.trim();
+      if(!name || !number){
+        alert("Preencha nome e número");
+        return;
+      }
+      addContact(name, number);
+      contactNameInput.value = "";
+      destNumberInput.value = "";
+    };
+
+    // Status online e digitando
+    function updateStatusListener(dest){
+      db.ref("users/" + dest).on("value", snap => {
+        const u = snap.val();
+        if(u){
+          if(u.typing) subHeader.textContent = "Digitando...";
+          else subHeader.textContent = u.online ? "Online" : "Offline";
+        }
+      });
+    }
+
+    // Carrega mensagens
+    function loadMessages(){
+      chatDiv.innerHTML = "";
+      if(!currentDest){
+        inputArea.style.display = "none";
+        return;
+      }
+      inputArea.style.display = "flex";
+      db.ref("messages").off();
+      db.ref("messages").on("value", snap => {
+        chatDiv.innerHTML = "";
+        const data = snap.val();
+        if(!data) return;
+        for(let id in data){
