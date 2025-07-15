@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!DOCTYPE html><html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ObriChat - Estilo WhatsApp</title>
+  <title>ObriChat - PossaniX</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -23,13 +20,26 @@
       display: flex;
       flex-direction: column;
     }
-    #sidebar h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
+    #profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    #contacts-list {
-      flex: 1;
-      overflow-y: auto;
+    #profile img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 2px solid #2aaf6e;
+    }
+    #contacts-list button img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
     }
     #contacts-list button {
       background: none;
@@ -40,20 +50,20 @@
       width: 100%;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       cursor: pointer;
+      display: flex;
+      align-items: center;
     }
     #main {
       flex: 1;
       display: flex;
       flex-direction: column;
       background: linear-gradient(135deg, #1e3c72, #2aaf6e);
-      padding: 0;
     }
     #header {
       background: rgba(0,0,0,0.2);
       padding: 15px;
       color: #fff;
       font-weight: bold;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -83,7 +93,6 @@
     #input-area {
       display: flex;
       padding: 10px;
-      border-top: 1px solid rgba(255,255,255,0.1);
       background: rgba(0,0,0,0.2);
     }
     #msg-input {
@@ -94,7 +103,7 @@
       font-size: 16px;
       margin-right: 10px;
     }
-    button#send-btn {
+    #send-btn {
       background: #2aaf6e;
       border: none;
       border-radius: 8px;
@@ -102,10 +111,7 @@
       font-weight: bold;
       cursor: pointer;
     }
-    #add-contact {
-      padding-top: 15px;
-    }
-    #add-contact input, #add-contact button {
+    #add-contact input, #add-contact button, #file-input {
       width: 100%;
       margin-bottom: 10px;
       padding: 8px;
@@ -118,39 +124,30 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .empty-msg {
-      color: #ccc;
-      text-align: center;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
   <div id="sidebar">
-    <h3>Contatos</h3>
+    <div id="profile">
+      <img id="profile-img" src="" alt="Foto" />
+      <input type="file" id="file-input" accept="image/*" />
+      <div id="user-number-display"></div>
+    </div>
     <div id="contacts-list"></div>
     <div id="add-contact">
       <input id="contact-name" placeholder="Nome do contato" />
-      <input id="dest-number" placeholder="Número (ex: (555) 123-4567)" />
+      <input id="dest-number" placeholder="Número (555) 123-4567" />
       <button id="enter-btn">Adicionar</button>
     </div>
   </div>
-
   <div id="main">
-    <div id="header">
-      <span>ObriChat</span>
-      <span id="user-number-display" style="font-weight: normal; font-size: 0.9em; opacity: 0.8;"></span>
-    </div>
-    <div id="chat"><p class="empty-msg">Nenhuma conversa selecionada.</p></div>
+    <div id="header">ObriChat</div>
+    <div id="chat"></div>
     <div id="input-area" style="display:none">
       <input id="msg-input" placeholder="Digite sua mensagem..." />
       <button id="send-btn">Enviar</button>
     </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script>
+  </div>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
       authDomain: "obrichat-4c631.firebaseapp.com",
@@ -165,35 +162,58 @@
 
     let userNumber = localStorage.getItem("userNumber") || generateNumber();
     localStorage.setItem("userNumber", userNumber);
+    document.getElementById("user-number-display").textContent = userNumber;
 
-    let savedContacts = JSON.parse(localStorage.getItem("savedContacts") || "[]");
-    let currentDest = "";
+    const profileImg = document.getElementById("profile-img");
+    const fileInput = document.getElementById("file-input");
 
-    const chatDiv = document.getElementById("chat");
+    // Load profile pic
+    database.ref("users/" + userNumber).once("value", snap => {
+      const data = snap.val();
+      if (data && data.photo) {
+        profileImg.src = data.photo;
+      }
+    });
+
+    fileInput.onchange = () => {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result;
+        profileImg.src = base64;
+        database.ref("users/" + userNumber).set({ photo: base64 });
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Chat system
     const msgInput = document.getElementById("msg-input");
     const sendBtn = document.getElementById("send-btn");
     const contactsList = document.getElementById("contacts-list");
+    const chatDiv = document.getElementById("chat");
     const header = document.getElementById("header");
-    const userNumberDisplay = document.getElementById("user-number-display");
 
-    userNumberDisplay.textContent = "Seu número: " + userNumber;
-
-    function generateNumber() {
-      return `(555) ${Math.floor(100 + Math.random()*900)}-${Math.floor(1000 + Math.random()*9000)}`;
-    }
+    let currentDest = "";
+    let savedContacts = JSON.parse(localStorage.getItem("savedContacts") || "[]");
 
     function updateContactsList() {
       contactsList.innerHTML = "";
-      if (savedContacts.length === 0) {
-        contactsList.innerHTML = '<p style="color:#ccc">Nenhum contato salvo</p>';
-        return;
-      }
       savedContacts.forEach(c => {
         const btn = document.createElement("button");
-        btn.textContent = `${c.name} — ${c.number}`;
+        const img = document.createElement("img");
+        img.src = "";
+        btn.appendChild(img);
+        btn.appendChild(document.createTextNode(`${c.name} — ${c.number}`));
+
+        database.ref("users/" + c.number).once("value", snap => {
+          const data = snap.val();
+          if (data && data.photo) img.src = data.photo;
+          else img.src = "https://via.placeholder.com/24x24";
+        });
+
         btn.onclick = () => {
           currentDest = c.number;
-          header.querySelector("span").textContent = c.name;
+          header.textContent = c.name;
           loadMessages();
         };
         contactsList.appendChild(btn);
@@ -208,34 +228,31 @@
       }
     }
 
+    document.getElementById("enter-btn").onclick = () => {
+      const name = document.getElementById("contact-name").value.trim();
+      const number = document.getElementById("dest-number").value.trim();
+      if (!name || !number) return alert("Preencha tudo!");
+      currentDest = number;
+      addContact(name, number);
+      header.textContent = name;
+      loadMessages();
+    };
+
     function loadMessages() {
       chatDiv.innerHTML = "";
       database.ref("messages").on("value", snapshot => {
         chatDiv.innerHTML = "";
         const data = snapshot.val();
-        if (!data) {
-          chatDiv.innerHTML = '<p class="empty-msg">Nenhuma mensagem nesta conversa.</p>';
-          document.getElementById("input-area").style.display = "flex";
-          return;
-        }
-        let hasMessages = false;
+        if (!data) return;
         for (let id in data) {
           const msg = data[id];
           if ((msg.sender === userNumber && msg.receiver === currentDest) ||
               (msg.sender === currentDest && msg.receiver === userNumber)) {
-            hasMessages = true;
             const div = document.createElement("div");
             div.classList.add("msg", msg.sender === userNumber ? "me" : "other");
             div.textContent = msg.text;
             chatDiv.appendChild(div);
-
-            if (msg.sender === currentDest && Notification.permission === "granted") {
-              new Notification("Nova mensagem", { body: msg.text });
-            }
           }
-        }
-        if (!hasMessages) {
-          chatDiv.innerHTML = '<p class="empty-msg">Nenhuma mensagem nesta conversa.</p>';
         }
         chatDiv.scrollTop = chatDiv.scrollHeight;
         document.getElementById("input-area").style.display = "flex";
@@ -250,21 +267,6 @@
       msgInput.value = "";
     };
 
-    document.getElementById("enter-btn").onclick = () => {
-      const name = document.getElementById("contact-name").value.trim();
-      const number = document.getElementById("dest-number").value.trim();
-      if (!name || !number) return alert("Preencha nome e número");
-      currentDest = number;
-      addContact(name, number);
-      header.querySelector("span").textContent = name;
-      loadMessages();
-    };
-
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
     updateContactsList();
-  </script>
-</body>
+  </script></body>
 </html>
