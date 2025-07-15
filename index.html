@@ -2,53 +2,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ObriChat - Com Nomes e Notificações</title>
+  <title>ObriChat - Estilo WhatsApp</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2aaf6e);
-      color: #fff;
       margin: 0;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+    }
+    #sidebar {
+      width: 280px;
+      background: #1e3c72;
+      color: #fff;
+      padding: 15px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      height: 100vh;
     }
-    #number-area, #input-area {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    #sidebar h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
     }
-    button {
+    #contacts-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    #contacts-list button {
+      background: none;
+      border: none;
+      color: #fff;
+      text-align: left;
       padding: 10px;
       width: 100%;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 16px;
-      background: #2aaf6e;
-      color: white;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
       cursor: pointer;
-      margin-top: 10px;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #1e3c72, #2aaf6e);
+      padding: 0;
+    }
+    #header {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      color: #fff;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     #chat {
-      display: none;
-      background: rgba(0,0,0,0.15);
-      width: 320px;
-      height: 350px;
+      flex: 1;
+      padding: 15px;
       overflow-y: auto;
-      padding: 10px;
-      border-radius: 12px;
-      margin: 10px 0;
     }
     .msg {
       margin-bottom: 10px;
-      padding: 8px;
+      padding: 10px;
       border-radius: 10px;
       max-width: 70%;
+      display: inline-block;
     }
     .me {
       background: #2aaf6e;
@@ -60,30 +76,67 @@
       margin-right: auto;
       color: #c1e9de;
     }
-    #contacts-list button {
-      display: block;
-      width: 100%;
-      margin: 3px 0;
-      background: #1e3c72;
-      color: #c1e9de;
+    #input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.2);
+    }
+    #msg-input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
       border: none;
-      padding: 6px;
-      text-align: left;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button#send-btn {
+      background: #2aaf6e;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #add-contact {
+      padding-top: 15px;
+    }
+    #add-contact input, #add-contact button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
       border-radius: 6px;
+      border: none;
+    }
+    #add-contact button {
+      background: #2aaf6e;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .empty-msg {
+      color: #ccc;
+      text-align: center;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>ObriChat</h2>
-  <div id="number-area">
-    <p>Seu número: <strong id="user-number-display"></strong></p>
-    <input id="contact-name" placeholder="Nome do contato" />
-    <input id="dest-number" placeholder="Número (ex: (555) 123-4567)" />
-    <button id="enter-btn">Entrar</button>
-  </div>  <div id="contacts-list"></div>
-  <div id="chat"></div>  <div id="input-area" style="display:none">
-    <input id="msg-input" placeholder="Digite sua mensagem..." />
-    <button id="send-btn">Enviar</button>
+  <div id="sidebar">
+    <h3>Contatos</h3>
+    <div id="contacts-list"></div>
+    <div id="add-contact">
+      <input id="contact-name" placeholder="Nome do contato" />
+      <input id="dest-number" placeholder="Número (ex: (555) 123-4567)" />
+      <button id="enter-btn">Adicionar</button>
+    </div>
+  </div>  <div id="main">
+    <div id="header">ObriChat</div>
+    <div id="chat"><p class="empty-msg">Nenhuma conversa selecionada.</p></div>
+    <div id="input-area" style="display:none">
+      <input id="msg-input" placeholder="Digite sua mensagem..." />
+      <button id="send-btn">Enviar</button>
+    </div>
   </div>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
@@ -99,11 +152,6 @@
 
     let userNumber = localStorage.getItem("userNumber") || generateNumber();
     localStorage.setItem("userNumber", userNumber);
-    document.getElementById("user-number-display").textContent = userNumber;
-
-    function generateNumber() {
-      return `(555) ${Math.floor(100 + Math.random()*900)}-${Math.floor(1000 + Math.random()*9000)}`;
-    }
 
     let savedContacts = JSON.parse(localStorage.getItem("savedContacts") || "[]");
     let currentDest = "";
@@ -112,15 +160,24 @@
     const msgInput = document.getElementById("msg-input");
     const sendBtn = document.getElementById("send-btn");
     const contactsList = document.getElementById("contacts-list");
+    const header = document.getElementById("header");
+
+    function generateNumber() {
+      return `(555) ${Math.floor(100 + Math.random()*900)}-${Math.floor(1000 + Math.random()*9000)}`;
+    }
 
     function updateContactsList() {
       contactsList.innerHTML = "";
+      if (savedContacts.length === 0) {
+        contactsList.innerHTML = '<p style="color:#ccc">Nenhum contato salvo</p>';
+        return;
+      }
       savedContacts.forEach(c => {
         const btn = document.createElement("button");
         btn.textContent = `${c.name} — ${c.number}`;
         btn.onclick = () => {
           currentDest = c.number;
-          document.getElementById("dest-number").value = c.number;
+          header.textContent = c.name;
           loadMessages();
         };
         contactsList.appendChild(btn);
@@ -146,7 +203,7 @@
               (msg.sender === currentDest && msg.receiver === userNumber)) {
             const div = document.createElement("div");
             div.classList.add("msg", msg.sender === userNumber ? "me" : "other");
-            div.textContent = `${msg.sender}: ${msg.text}`;
+            div.textContent = msg.text;
             chatDiv.appendChild(div);
 
             if (msg.sender === currentDest && Notification.permission === "granted") {
@@ -155,6 +212,7 @@
           }
         }
         chatDiv.scrollTop = chatDiv.scrollHeight;
+        document.getElementById("input-area").style.display = "flex";
       });
     }
 
@@ -172,13 +230,10 @@
       if (!name || !number) return alert("Preencha nome e número");
       currentDest = number;
       addContact(name, number);
-      document.getElementById("input-area").style.display = "block";
-      chatDiv.style.display = "block";
-      document.getElementById("number-area").style.display = "none";
+      header.textContent = name;
       loadMessages();
     };
 
-    // Permissão para notificações
     if (Notification.permission !== "granted") {
       Notification.requestPermission();
     }
