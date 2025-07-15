@@ -88,7 +88,7 @@
       flex-direction: column;
     }
     #input-area input {
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       width: 100%;
       padding: 10px;
       border-radius: 8px;
@@ -96,6 +96,31 @@
       font-size: 16px;
       outline: none;
       box-sizing: border-box;
+    }
+    #contacts-list {
+      max-height: 100px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.2);
+      padding: 8px;
+      border-radius: 8px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    #contacts-list button {
+      display: block;
+      width: 100%;
+      margin-bottom: 5px;
+      background: #1e3c72;
+      color: #c1e9de;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      padding: 6px 8px;
+      font-size: 15px;
+    }
+    #contacts-list button:hover {
+      background: #16603b;
     }
   </style>
 </head>
@@ -112,6 +137,7 @@
 
   <div id="input-area">
     <input id="dest-number" type="text" placeholder="Número do destinatário (ex: (555) 012-3456)" />
+    <div id="contacts-list"></div>
     <input id="msg-input" type="text" placeholder="Digite sua mensagem..." />
     <button id="send-btn">Enviar</button>
   </div>
@@ -134,7 +160,6 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Gera número aleatório
     function generateRandomNumber() {
       const prefix = "(555)";
       const middle = String(Math.floor(100 + Math.random() * 900)).padStart(3, '0');
@@ -156,15 +181,51 @@
     const destNumberInput = document.getElementById('dest-number');
     const msgInput = document.getElementById('msg-input');
     const sendBtn = document.getElementById('send-btn');
+    const contactsListDiv = document.getElementById('contacts-list');
 
     let currentDest = '';
+    let messagesListener = null;
+
+    // Contatos salvos (números)
+    let savedContacts = JSON.parse(localStorage.getItem('savedContacts') || '[]');
+
+    function updateContactsList() {
+      contactsListDiv.innerHTML = '';
+      savedContacts.forEach(num => {
+        const btn = document.createElement('button');
+        btn.textContent = num;
+        btn.onclick = () => {
+          destNumberInput.value = num;
+          currentDest = num;
+          loadMessages();
+        };
+        contactsListDiv.appendChild(btn);
+      });
+    }
+
+    function addContact(num) {
+      if (!savedContacts.includes(num)) {
+        savedContacts.push(num);
+        localStorage.setItem('savedContacts', JSON.stringify(savedContacts));
+        updateContactsList();
+      }
+    }
+
+    // Atualiza lista ao carregar página
+    updateContactsList();
 
     function loadMessages() {
       if (!currentDest) {
         chatDiv.innerHTML = '<p style="text-align:center;">Digite o número do destinatário para ver as mensagens.</p>';
         return;
       }
-      database.ref('messages').on('value', snapshot => {
+
+      // Remove listener anterior para evitar duplicação
+      if (messagesListener) {
+        database.ref('messages').off('value', messagesListener);
+      }
+
+      messagesListener = database.ref('messages').on('value', snapshot => {
         chatDiv.innerHTML = '';
         const messages = snapshot.val();
         if (!messages) return;
@@ -191,6 +252,8 @@
       if (dest === '') return alert('Digite o número do destinatário!');
       if (dest === userNumber) return alert('Você não pode enviar mensagem para você mesmo!');
 
+      addContact(dest);  // Salva contato ao enviar mensagem
+
       const newMsgKey = database.ref().child('messages').push().key;
       database.ref('messages/' + newMsgKey).set({
         sender: userNumber,
@@ -198,7 +261,6 @@
         text: text
       }).then(() => {
         msgInput.value = '';
-        loadMessages();
       }).catch(error => {
         alert('Erro ao enviar a mensagem: ' + error.message);
       });
@@ -209,6 +271,15 @@
     msgInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         sendMessage();
+      }
+    });
+
+    destNumberInput.addEventListener('change', () => {
+      const num = destNumberInput.value.trim();
+      if (num) {
+        currentDest = num;
+        addContact(num);  // Salva contato ao mudar o número
+        loadMessages();
       }
     });
 
