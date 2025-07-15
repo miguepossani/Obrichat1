@@ -105,6 +105,7 @@
       border-radius: 8px;
       color: #fff;
       margin-bottom: 10px;
+      border: 2px solid transparent;
     }
     #contacts-list button {
       display: block;
@@ -146,6 +147,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <script>
+    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
       authDomain: "obrichat-4c631.firebaseapp.com",
@@ -167,30 +169,36 @@
       return `${prefix} ${middle}-${end}`;
     }
 
+    // Elementos
+    const numberArea = document.getElementById('number-area');
+    const userNumberDisplay = document.getElementById('user-number-display');
+    const chatDiv = document.getElementById('chat');
+    const inputArea = document.getElementById('input-area');
+    const destNumberInput = document.getElementById('dest-number');
+    const contactsListDiv = document.getElementById('contacts-list');
+    const msgInput = document.getElementById('msg-input');
+    const sendBtn = document.getElementById('send-btn');
+    const saveNumberBtn = document.getElementById('save-number-btn');
+
+    // Número do usuário
     let userNumber = localStorage.getItem("userNumber");
     if (!userNumber) {
       userNumber = generateRandomNumber();
       localStorage.setItem("userNumber", userNumber);
     }
+    userNumberDisplay.textContent = userNumber;
 
-    document.getElementById("user-number-display").textContent = userNumber;
-
-    const numberArea = document.getElementById('number-area');
-    const chatDiv = document.getElementById('chat');
-    const inputArea = document.getElementById('input-area');
-    const destNumberInput = document.getElementById('dest-number');
-    const msgInput = document.getElementById('msg-input');
-    const sendBtn = document.getElementById('send-btn');
-    const contactsListDiv = document.getElementById('contacts-list');
-
-    let currentDest = '';
-    let messagesListener = null;
-
-    // Contatos salvos (números)
+    // Contatos salvos
     let savedContacts = JSON.parse(localStorage.getItem('savedContacts') || '[]');
 
     function updateContactsList() {
       contactsListDiv.innerHTML = '';
+      if(savedContacts.length === 0) {
+        contactsListDiv.style.border = "2px solid transparent";
+        contactsListDiv.textContent = "Nenhum contato salvo ainda";
+        return;
+      }
+      contactsListDiv.style.border = "2px solid #2aaf6e";
       savedContacts.forEach(num => {
         const btn = document.createElement('button');
         btn.textContent = num;
@@ -211,16 +219,22 @@
       }
     }
 
-    // Atualiza lista ao carregar página
+    // Inicializa lista
     updateContactsList();
 
+    // Variáveis controle
+    let currentDest = '';
+    let messagesListener = null;
+
+    // Função para carregar mensagens do Firebase
     function loadMessages() {
+      console.log("loadMessages chamado com currentDest:", currentDest);
       if (!currentDest) {
         chatDiv.innerHTML = '<p style="text-align:center;">Digite o número do destinatário para ver as mensagens.</p>';
         return;
       }
 
-      // Remove listener anterior para evitar duplicação
+      // Remove listener antigo
       if (messagesListener) {
         database.ref('messages').off('value', messagesListener);
       }
@@ -245,6 +259,7 @@
       });
     }
 
+    // Função para enviar mensagem
     function sendMessage() {
       const text = msgInput.value.trim();
       const dest = destNumberInput.value.trim();
@@ -252,7 +267,7 @@
       if (dest === '') return alert('Digite o número do destinatário!');
       if (dest === userNumber) return alert('Você não pode enviar mensagem para você mesmo!');
 
-      addContact(dest);  // Salva contato ao enviar mensagem
+      addContact(dest); // Salva contato ao enviar
 
       const newMsgKey = database.ref().child('messages').push().key;
       database.ref('messages/' + newMsgKey).set({
@@ -266,6 +281,7 @@
       });
     }
 
+    // Eventos
     sendBtn.addEventListener('click', sendMessage);
 
     msgInput.addEventListener('keydown', e => {
@@ -278,18 +294,26 @@
       const num = destNumberInput.value.trim();
       if (num) {
         currentDest = num;
-        addContact(num);  // Salva contato ao mudar o número
+        addContact(num);
         loadMessages();
       }
     });
 
-    document.getElementById('save-number-btn').addEventListener('click', () => {
+    saveNumberBtn.addEventListener('click', () => {
       numberArea.style.display = 'none';
       chatDiv.style.display = 'block';
       inputArea.style.display = 'flex';
       currentDest = destNumberInput.value.trim();
       loadMessages();
     });
+
+    // Testa se o container de contatos existe
+    if (contactsListDiv) {
+      contactsListDiv.style.border = "2px solid red"; // borda vermelha pra ver se aparece
+      console.log("Div de contatos encontrada.");
+    } else {
+      console.log("Div de contatos NÃO encontrada!");
+    }
   </script>
 
 </body>
