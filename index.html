@@ -1,247 +1,70 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!DOCTYPE html><html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ObriChat - PossaniX</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: row;
-      background: #111;
-      color: #eee;
+    body, html {
+      margin: 0; padding: 0; height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #1e3c72, #2aaf6e); color: #fff;
+      display: flex; justify-content: center; align-items: center;
     }
-    #sidebar {
-      width: 280px;
-      background: #1e3c72;
-      color: #fff;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-    }
-    #profile {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    #profile img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 2px solid #2aaf6e;
-      cursor: pointer;
-    }
-    #profile-bio {
-      font-size: 14px;
-      margin-bottom: 8px;
-      font-style: italic;
-      min-height: 24px;
-      text-align: center;
-    }
-    #edit-bio-btn {
-      background: #2aaf6e;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
-      color: #002b1a;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    #contacts-list button {
-      background: none;
-      border: none;
-      color: #fff;
-      text-align: left;
-      padding: 10px;
-      width: 100%;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-    #contacts-list button img {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: linear-gradient(135deg, #1e3c72, #2aaf6e);
-    }
-    #header {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      color: #fff;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #sub-header {
-      font-size: 14px;
-      color: #c1e9de;
-      padding-left: 15px;
-      height: 20px;
-      font-style: italic;
-    }
-    #chat {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.15);
-      color: #e0f7f5;
-    }
-    .msg {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 70%;
-      display: inline-block;
-      word-break: break-word;
-    }
-    .me {
-      background: #2aaf6e;
-      margin-left: auto;
-      color: #002b1a;
-    }
-    .other {
-      background: #1e3c72;
-      margin-right: auto;
-      color: #c1e9de;
-    }
-    #input-area {
-      display: flex;
-      padding: 10px;
-      background: rgba(0,0,0,0.2);
-    }
-    #msg-input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-    #send-btn {
-      background: #2aaf6e;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #add-contact input, #add-contact button, #file-input {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-    }
-    #add-contact button {
-      background: #2aaf6e;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    /* Perfil overlay */
-    #profile-overlay {
-      position: fixed;
-      top: 0; left: 0; right:0; bottom: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    #profile-overlay .content {
-      background: #222;
+    #welcome-screen, #app-container {
+      background: rgba(0,0,0,0.3);
       border-radius: 12px;
       padding: 20px;
-      width: 300px;
-      color: #eee;
-      text-align: center;
-      position: relative;
+      width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #profile-overlay img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
+    #welcome-screen p {
       margin-bottom: 10px;
-      border: 2px solid #2aaf6e;
+      font-size: 16px;
     }
-    #profile-overlay button {
-      margin: 5px 10px;
-      padding: 8px 16px;
+    #user-number-display {
+      font-size: 20px;
       font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
+      margin: 10px 0 20px 0;
+      letter-spacing: 2px;
+      user-select: all;
+      background: rgba(255 255 255 / 0.15);
+      padding: 8px 15px;
+      border-radius: 10px;
+    }
+    button {
+      background: #2aaf6e;
       border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #002b1a;
+      font-size: 16px;
+      transition: background 0.3s ease;
+      width: 100%;
     }
-    #close-profile-btn {
-      background: #666;
-      color: #ccc;
+    button:hover {
+      background: #1e8e58;
     }
-    #delete-contact-btn {
-      background: #c33;
-      color: #fff;
+    #google-btn {
+      background: white;
+      color: #1e3c72;
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <div id="profile">
-      <img id="profile-img" src="" alt="Foto" title="Clique para editar perfil" />
-      <input type="file" id="file-input" accept="image/*" style="display:none" />
-      <div id="user-number-display" style="margin-bottom: 4px; font-weight: bold;"></div>
-      <div id="profile-bio"></div>
-      <button id="edit-bio-btn">Editar Bio</button>
-    </div>
-    <div id="contacts-list"></div>
-    <div id="add-contact">
-      <input id="contact-name" placeholder="Nome do contato" autocomplete="off" />
-      <input id="dest-number" placeholder="Número (555) 123-4567" autocomplete="off" />
-      <button id="enter-btn">Adicionar</button>
-    </div>
-  </div>
-  <div id="main">
-    <div id="header">ObriChat</div>
-    <div id="sub-header"></div>
-    <div id="chat"></div>
-    <div id="input-area" style="display:none">
-      <input id="msg-input" placeholder="Digite sua mensagem..." autocomplete="off" />
-      <button id="send-btn">Enviar</button>
-    </div>
-  </div>
-
-  <!-- Perfil overlay -->
-  <div id="profile-overlay">
-    <div class="content">
-      <img id="overlay-img" src="" alt="Foto do contato" />
-      <div id="overlay-name" style="font-weight: bold; font-size: 18px; margin-bottom: 6px;"></div>
-      <div id="overlay-number" style="margin-bottom: 6px; font-style: italic;"></div>
-      <div id="overlay-bio" style="margin-bottom: 10px;"></div>
-      <div id="overlay-last-seen" style="font-size: 13px; color: #aab;"></div>
-      <button id="delete-contact-btn">Excluir contato</button>
-      <button id="close-profile-btn">Fechar</button>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script>
+  <div id="welcome-screen">
+    <p>Bem-vindo ao ObriChat!</p>
+    <p>Seu número gerado é:</p>
+    <div id="user-number-display"></div>
+    <button id="enter-btn">Entrar com número</button>
+    <button id="google-btn">Entrar com Google</button>
+  </div>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
       authDomain: "obrichat-4c631.firebaseapp.com",
@@ -253,252 +76,50 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    // Usuário atual
-    let userNumber = localStorage.getItem("userNumber") || "(555) " + Math.floor(100 + Math.random()*900) + "-" + Math.floor(1000 + Math.random()*9000);
-    localStorage.setItem("userNumber", userNumber);
-
-    // Elementos
-    const profileImg = document.getElementById("profile-img");
-    const fileInput = document.getElementById("file-input");
     const userNumberDisplay = document.getElementById("user-number-display");
-    const profileBio = document.getElementById("profile-bio");
-    const editBioBtn = document.getElementById("edit-bio-btn");
-    const contactsList = document.getElementById("contacts-list");
-    const chatDiv = document.getElementById("chat");
-    const header = document.getElementById("header");
-    const subHeader = document.getElementById("sub-header");
-    const inputArea = document.getElementById("input-area");
-    const msgInput = document.getElementById("msg-input");
-    const sendBtn = document.getElementById("send-btn");
+    const enterBtn = document.getElementById("enter-btn");
+    const googleBtn = document.getElementById("google-btn");
 
-    // Overlay perfil
-    const profileOverlay = document.getElementById("profile-overlay");
-    const overlayImg = document.getElementById("overlay-img");
-    const overlayName = document.getElementById("overlay-name");
-    const overlayNumber = document.getElementById("overlay-number");
-    const overlayBio = document.getElementById("overlay-bio");
-    const overlayLastSeen = document.getElementById("overlay-last-seen");
-    const deleteContactBtn = document.getElementById("delete-contact-btn");
-    const closeProfileBtn = document.getElementById("close-profile-btn");
-
-    // Contatos salvos localmente
-    let savedContacts = JSON.parse(localStorage.getItem("savedContacts") || "[]");
-
-    // Contatos bloqueados
-    let blockedContacts = JSON.parse(localStorage.getItem("blockedContacts") || "{}");
-
-    // Atualiza lista contatos
-    function updateContactsList() {
-      contactsList.innerHTML = "";
-      if (savedContacts.length === 0) {
-        contactsList.innerHTML = "<p style='color:#ccc; padding:10px;'>Nenhum contato salvo.</p>";
-        inputArea.style.display = "none";
-        chatDiv.innerHTML = "";
-        header.textContent = "ObriChat";
-        subHeader.textContent = "";
-        return;
+    // Entrar com número aleatório
+    enterBtn.onclick = () => {
+      let userNumber = localStorage.getItem("userNumber");
+      if (!userNumber) {
+        userNumber = "(555) " + Math.floor(100 + Math.random() * 900) + "-" + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem("userNumber", userNumber);
       }
-      savedContacts.forEach(c => {
-        const btn = document.createElement("button");
-        const img = document.createElement("img");
-        img.src = "";
-        btn.appendChild(img);
-        btn.appendChild(document.createTextNode(`${c.name} — ${c.number}`));
-        db.ref("users/" + c.number).once("value", snap => {
-          const data = snap.val();
-          if (data && data.photo) img.src = data.photo;
-          else img.src = "https://via.placeholder.com/24x24";
-        });
-        btn.onclick = () => {
-          if(blockedContacts[c.number]) {
-            alert("Você bloqueou esse contato. Para desbloquear, edite seus contatos.");
-            return;
-          }
-          openChatWith(c);
-        };
-        contactsList.appendChild(btn);
-      });
-    }
-
-    // Abre chat e atualiza UI
-    function openChatWith(contact) {
-      currentDest = contact.number;
-      header.textContent = contact.name;
-      inputArea.style.display = "flex";
-      subHeader.textContent = "Carregando...";
-      listenUserStatus(contact.number);
-      loadMessages();
-    }
-
-    // Escuta status online e digitando
-    let userStatusListener = null;
-    function listenUserStatus(contactNumber) {
-      if (userStatusListener) userStatusListener.off();
-      userStatusListener = db.ref("users/" + contactNumber);
-      userStatusListener.on("value", snap => {
-        const u = snap.val();
-        if (!u) {
-          subHeader.textContent = "Offline";
-          return;
-        }
-        if(u.online) {
-          subHeader.textContent = u.typing ? "Digitando..." : "Online";
-        } else if(u.lastSeen) {
-          const date = new Date(u.lastSeen);
-          subHeader.textContent = "Visto por último às " + date.toLocaleTimeString();
-        } else {
-          subHeader.textContent = "Offline";
-        }
-      });
-    }
-
-    // Adiciona contato e salva
-    function addContact(name, number) {
-      if (!savedContacts.some(c => c.number === number)) {
-        savedContacts.push({ name, number });
-        localStorage.setItem("savedContacts", JSON.stringify(savedContacts));
-        updateContactsList();
-      }
-    }
-
-    // Remove contato
-    function deleteContact(number) {
-      savedContacts = savedContacts.filter(c => c.number !== number);
-      localStorage.setItem("savedContacts", JSON.stringify(savedContacts));
-      if(currentDest === number) {
-        currentDest = "";
-        chatDiv.innerHTML = "";
-        inputArea.style.display = "none";
-        header.textContent = "ObriChat";
-        subHeader.textContent = "";
-      }
-      updateContactsList();
-    }
-
-    // Editar bio no perfil do usuário atual
-    function editBio() {
-      let bio = profileBio.textContent || "";
-      let newBio = prompt("Digite sua nova bio:", bio);
-      if(newBio !== null) {
-        profileBio.textContent = newBio;
-        db.ref("users/" + userNumber).update({ bio: newBio });
-      }
-    }
-
-    // Abrir perfil do contato clicado (na lista)
-    function openProfileOverlay(contact) {
-      overlayImg.src = "";
-      overlayName.textContent = contact.name;
-      overlayNumber.textContent = contact.number;
-      overlayBio.textContent = "Carregando bio...";
-      overlayLastSeen.textContent = "";
-      deleteContactBtn.style.display = "inline-block";
-      profileOverlay.style.display = "flex";
-
-      db.ref("users/" + contact.number).once("value", snap => {
-        const data = snap.val() || {};
-        if(data.photo) overlayImg.src = data.photo;
-        else overlayImg.src = "https://via.placeholder.com/100";
-        overlayBio.textContent = data.bio || "(Sem bio)";
-        if(data.online) overlayLastSeen.textContent = "Online";
-        else if(data.lastSeen) {
-          const date = new Date(data.lastSeen);
-          overlayLastSeen.textContent = "Visto por último às " + date.toLocaleTimeString();
-        } else {
-          overlayLastSeen.textContent = "Offline";
-        }
-      });
-
-      // Apaga contato se confirmar
-      deleteContactBtn.onclick = () => {
-        if(confirm(`Excluir contato ${contact.name}?`)) {
-          deleteContact(contact.number);
-          profileOverlay.style.display = "none";
-          if(currentDest === contact.number) {
-            chatDiv.innerHTML = "";
-            inputArea.style.display = "none";
-            header.textContent = "ObriChat";
-            subHeader.textContent = "";
-            currentDest = "";
-          }
-        }
-      };
-    }
-
-    // Variáveis estado
-    let currentDest = "";
-
-    // Carrega mensagens do chat atual
-    function loadMessages() {
-      chatDiv.innerHTML = "";
-      db.ref("messages").off();
-      db.ref("messages").on("value", snapshot => {
-        chatDiv.innerHTML = "";
-        const data = snapshot.val();
-        if (!data) return;
-        for (let id in data) {
-          const msg = data[id];
-          if ((msg.sender === userNumber && msg.receiver === currentDest) ||
-              (msg.sender === currentDest && msg.receiver === userNumber)) {
-            // Ignorar mensagens de contatos bloqueados
-            if(blockedContacts[msg.sender]) continue;
-            const div = document.createElement("div");
-            div.classList.add("msg", msg.sender === userNumber ? "me" : "other");
-            div.textContent = msg.text;
-            chatDiv.appendChild(div);
-            // Notificação para mensagens recebidas
-            if (msg.sender === currentDest && Notification.permission === "granted") {
-              new Notification("Nova mensagem", { body: msg.text });
-            }
-          }
-        }
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-      });
-    }
-
-    // Atualiza presença online e digitando
-    function updatePresence(typing=false) {
-      db.ref("users/" + userNumber).update({
-        online: true,
-        typing: typing,
-        lastSeen: Date.now()
-      });
-    }
-
-    // Ao carregar, mostra número e foto
-    userNumberDisplay.textContent = userNumber;
-    db.ref("users/" + userNumber).once("value", snap => {
-      const data = snap.val() || {};
-      if(data.photo) profileImg.src = data.photo;
-      if(data.bio) profileBio.textContent = data.bio;
-    });
-
-    // Salva online no Firebase e atualiza lastSeen quando sai
-    updatePresence();
-    window.addEventListener("beforeunload", () => {
-      db.ref("users/" + userNumber).update({
-        online: false,
-        typing: false,
-        lastSeen: Date.now()
-      });
-    });
-
-    // Upload foto perfil
-    profileImg.onclick = () => fileInput.click();
-    fileInput.onchange = () => {
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result;
-        profileImg.src = base64;
-        db.ref("users/" + userNumber).update({ photo: base64 });
-      };
-      reader.readAsDataURL(file);
+      userNumberDisplay.textContent = userNumber;
+      localStorage.setItem("entered", "true");
+      location.reload();
     };
 
-    // Editar bio
-    editBioBtn.onclick = editBio;
+    // Login com Google
+    googleBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          const userData = {
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL
+          };
+          localStorage.setItem("userNumber", user.uid);
+          db.ref("users/" + user.uid).update(userData);
+          localStorage.setItem("entered", "true");
+          location.reload();
+        })
+        .catch(error => {
+          alert("Erro no login: " + error.message);
+        });
+    };
 
-    // Botão adicionar contato
-    document.getElementById("enter-btn").onclick
+    // Exibir número se já entrou
+    const existing = localStorage.getItem("userNumber");
+    if(existing){
+      userNumberDisplay.textContent = existing;
+    }
+  </script></body>
+</html>
