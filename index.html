@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ObriChat - Chat com destinatário</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2aaf6e);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+  }
+  h2 {
+    margin-bottom: 20px;
+  }
+  #number-area, #input-area {
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 12px;
+    width: 320px;
+    max-width: 90vw;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  }
+  #number-area {
+    margin-bottom: 20px;
+  }
+  #number-area input, #input-area input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    background: #2aaf6e;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #1e8e58;
+  }
+  #chat {
+    background: rgba(0,0,0,0.15);
+    border-radius: 12px;
+    width: 320px;
+    max-width: 90vw;
+    height: 350px;
+    overflow-y: auto;
+    padding: 15px;
+    box-sizing: border-box;
+    color: #e0f7f5;
+    display: none;
+  }
+  .msg {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 0 5px rgba(42,175,110,0.7);
+  }
+  .me {
+    background: #2aaf6e;
+    margin-left: auto;
+    text-align: right;
+    color: #002b1a;
+    font-weight: 600;
+  }
+  .other {
+    background: #1e3c72;
+    margin-right: auto;
+    text-align: left;
+    color: #c1e9de;
+    font-weight: 500;
+  }
+  #input-area {
+    display: none;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  #input-area input {
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+  <h2>ObriChat</h2>
+
+  <div id="number-area">
+    <label>Seu número (ex: (555) 023-9145):</label>
+    <input id="user-number" type="text" placeholder="(555) 023-9145" />
+    <button id="save-number-btn">Entrar</button>
+  </div>
+
+  <div id="chat"></div>
+
+  <div id="input-area">
+    <input id="dest-number" type="text" placeholder="Número do destinatário (ex: (555) 012-3456)" />
+    <input id="msg-input" type="text" placeholder="Digite sua mensagem..." />
+    <button id="send-btn">Enviar</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
+      authDomain: "obrichat-4c631.firebaseapp.com",
+      databaseURL: "https://obrichat-4c631-default-rtdb.firebaseio.com",
+      projectId: "obrichat-4c631",
+      storageBucket: "obrichat-4c631.firebasestorage.app",
+      messagingSenderId: "587921807769",
+      appId: "1:587921807769:web:386f5370030c1dc8931b08",
+      measurementId: "G-D4JV6CEYDW"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const numberArea = document.getElementById('number-area');
+    const userNumberInput = document.getElementById('user-number');
+    const saveNumberBtn = document.getElementById('save-number-btn');
+    const chatDiv = document.getElementById('chat');
+    const inputArea = document.getElementById('input-area');
+    const destNumberInput = document.getElementById('dest-number');
+    const msgInput = document.getElementById('msg-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    let userNumber = '';
+    let currentDest = '';
+
+    function loadMessages() {
+      // Exibe só mensagens entre userNumber e currentDest (nos 2 sentidos)
+      database.ref('messages').on('value', snapshot => {
+        chatDiv.innerHTML = '';
+        const messages = snapshot.val();
+        if (!messages) return;
+        for (let id in messages) {
+          const msg = messages[id];
+          const sentByUser = msg.sender === userNumber && msg.receiver === currentDest;
+          const receivedByUser = msg.sender === currentDest && msg.receiver === userNumber;
+          if (sentByUser || receivedByUser) {
+            const div = document.createElement('div');
+            div.classList.add('msg');
+            div.classList.add(msg.sender === userNumber ? 'me' : 'other');
+            div.textContent = `${msg.sender}: ${msg.text}`;
+            chatDiv.appendChild(div);
+          }
+        }
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      });
+    }
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      const dest = destNumberInput.value.trim();
+      if (text === '') return alert('Digite a mensagem!');
+      if (dest === '') return alert('Digite o número do destinatário!');
+
+      if (dest === userNumber) return alert('Você não pode enviar mensagem para você mesmo!');
+
+      currentDest = dest;
+
+      const newMsgKey = database.ref().child('messages').push().key;
+      database.ref('messages/' + newMsgKey).set({
+        sender: userNumber,
+        receiver: dest,
+        text: text
+      });
+
+      msgInput.value = '';
+      msgInput.focus();
+      loadMessages();
+    }
+
+    function enterChat() {
+      const num = userNumberInput.value.trim();
+      if (num === '') {
+        alert('Digite seu número!');
+        return;
+      }
+      userNumber = num;
+      numberArea.style.display = 'none';
+      chatDiv.style.display = 'block';
+      inputArea.style.display = 'flex';
+    }
+
+    saveNumberBtn.addEventListener('click', enterChat);
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+
+</body>
+  </html>
