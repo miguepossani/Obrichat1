@@ -85,7 +85,6 @@
       margin-bottom: 10px;
       margin-top: 10px;
       gap: 10px;
-      display: flex;
       flex-direction: column;
     }
     #input-area input {
@@ -185,24 +184,42 @@
       });
     }
 
-    // Atualiza currentDest e recarrega mensagens ao mudar destinatário
-    destNumberInput.addEventListener('change', () => {
-      currentDest = destNumberInput.value.trim();
-      loadMessages();
-    });
-
     function sendMessage() {
       const text = msgInput.value.trim();
       const dest = destNumberInput.value.trim();
       if (text === '') return alert('Digite a mensagem!');
       if (dest === '') return alert('Digite o número do destinatário!');
       if (dest === userNumber) return alert('Você não pode enviar mensagem para você mesmo!');
-      
+
       const newMsgKey = database.ref().child('messages').push().key;
       database.ref('messages/' + newMsgKey).set({
         sender: userNumber,
         receiver: dest,
         text: text
+      }).then(() => {
+        msgInput.value = '';
+        loadMessages();
+      }).catch(error => {
+        alert('Erro ao enviar a mensagem: ' + error.message);
       });
+    }
 
-      msgInput.value =
+    sendBtn.addEventListener('click', sendMessage);
+
+    msgInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    document.getElementById('save-number-btn').addEventListener('click', () => {
+      numberArea.style.display = 'none';
+      chatDiv.style.display = 'block';
+      inputArea.style.display = 'flex';
+      currentDest = destNumberInput.value.trim();
+      loadMessages();
+    });
+  </script>
+
+</body>
+</html>
