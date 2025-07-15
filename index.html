@@ -5,61 +5,646 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ObriChat - PossaniX</title>
   <style>
-    body, html { margin:0; padding:0; height:100%; font-family:Arial,sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2aaf6e); color:#fff;
-      display:flex; justify-content:center; align-items:center;
+    * { box-sizing: border-box; }
+    body, html {
+      margin: 0; padding: 0; height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #1e3c72, #2aaf6e); color: #fff;
+      display: flex; justify-content: center; align-items: center;
     }
-    #welcome, #app { background:rgba(0,0,0,0.3); border-radius:12px; padding:20px;
-      width:320px; max-width:90vw; box-shadow:0 0 15px rgba(0,0,0,0.5);
-      display:flex; flex-direction:column; align-items:center;
+    #welcome-screen, #app-container {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #app { display:none; height:90vh; width:90vw; max-width:900px; }
-    button{ background:#2aaf6e;border:none;border-radius:8px;padding:12px 20px;
-      font-weight:bold;cursor:pointer;color:#002b1a;font-size:16px;margin-top:10px;
+    #welcome-screen {
+      text-align: center;
     }
-    button:hover{ background:#1e8e58; }
+    #welcome-screen p {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    #user-number-display {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0 20px 0;
+      letter-spacing: 2px;
+      user-select: all;
+      background: rgba(255 255 255 / 0.15);
+      padding: 8px 15px;
+      border-radius: 10px;
+    }
+    button {
+      background: #2aaf6e;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #002b1a;
+      font-size: 16px;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+    button:hover {
+      background: #1e8e58;
+    }
+    #app-container {
+      display: none;
+      height: 90vh;
+      width: 90vw;
+      max-width: 900px;
+      flex-direction: row;
+      color: #fff;
+    }
+    #sidebar {
+      width: 280px;
+      background: #1e3c72;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      border-radius: 12px 0 0 12px;
+    }
+    #profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #profile img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 8px;
+      border: 2px solid #2aaf6e;
+      background: #333;
+    }
+    #profile-number {
+      font-weight: bold;
+      font-size: 14px;
+      user-select: text;
+    }
+    #contacts-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    #contacts-list button {
+      background: none;
+      border: none;
+      color: #fff;
+      text-align: left;
+      padding: 10px;
+      width: 100%;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #contacts-list button img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #555;
+      flex-shrink: 0;
+    }
+    #add-contact {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #add-contact input {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #1e3c72, #2aaf6e);
+      border-radius: 0 12px 12px 0;
+      overflow: hidden;
+    }
+    #header {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+    }
+    #sub-header {
+      font-size: 14px;
+      color: #c1e9de;
+      padding-left: 15px;
+      height: 22px;
+      background: rgba(0,0,0,0.2);
+    }
+    #chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.15);
+      user-select: text;
+    }
+    .msg {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      display: inline-block;
+      word-wrap: break-word;
+    }
+    .me {
+      background: #2aaf6e;
+      margin-left: auto;
+      color: #002b1a;
+    }
+    .other {
+      background: #1e3c72;
+      margin-right: auto;
+      color: #c1e9de;
+    }
+    #input-area {
+      display: flex;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      gap: 10px;
+    }
+    #msg-input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    #send-btn {
+      background: #2aaf6e;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #002b1a;
+    }
+    /* Modal para perfil */
+    #profile-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #profile-modal .modal-content {
+      background: #1e3c72;
+      border-radius: 12px;
+      padding: 20px;
+      width: 320px;
+      max-width: 90vw;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      user-select: text;
+    }
+    #profile-modal .modal-content img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #2aaf6e;
+    }
+    #profile-modal textarea {
+      width: 100%;
+      height: 80px;
+      border-radius: 8px;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      resize: none;
+      background: rgba(255 255 255 / 0.1);
+      color: #fff;
+      outline: none;
+    }
+    #profile-modal .close-btn {
+      background: #2aaf6e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #002b1a;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #language-selector {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      width: 100%;
+      background: #2aaf6e;
+      color: #002b1a;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-<div id="welcome">
-  <h2>Bem-vindo ao ObriChat!</h2>
-  <p>Seu número gerado é:</p>
-  <div id="num" style="font-size:20px;padding:10px;background:rgba(255,255,255,0.2);border-radius:8px;"></div>
-  <button id="enter">Entrar</button>
-</div>
+  <!-- Tela de boas vindas -->
+  <div id="welcome-screen">
+    <p id="welcome-text">Bem-vindo ao ObriChat!</p>
+    <p>Seu número gerado é:</p>
+    <div id="user-number-display"></div>
+    <button id="enter-btn">Entrar</button>
+  </div>
 
-<div id="app">
-  <h2>ObriChat funcionando!</h2>
-  <p>Aqui já entra seu chat com contatos, upload, mensagens e tudo mais.</p>
-</div>
+  <!-- App principal -->
+  <div id="app-container">
+    <div id="sidebar">
+      <div id="profile" title="Clique para ver seu perfil">
+        <img id="profile-img" src="" alt="Foto de perfil" />
+        <div id="profile-number"></div>
+      </div>
+      <select id="language-selector" title="Selecionar idioma">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="it">Italiano</option>
+        <option value="ko">한국어</option>
+        <option value="fr">Français</option>
+      </select>
+      <div id="contacts-list"></div>
+      <div id="add-contact">
+        <input id="contact-name" placeholder="Nome do contato" />
+        <input id="dest-number" placeholder="Número (555) 123-4567" />
+        <button id="add-contact-btn">Adicionar Contato</button>
+      </div>
+    </div>
+    <div id="main">
+      <div id="header">ObriChat</div>
+      <div id="sub-header"></div>
+      <div id="chat"></div>
+      <div id="input-area" style="display:none;">
+        <input id="msg-input" placeholder="Digite sua mensagem..." />
+        <button id="send-btn">Enviar</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-  // Geração e gravação do número
-  const numEl = document.getElementById("num");
-  let num = localStorage.getItem("userNumber");
-  if (!num) {
-    num = "(555) " + Math.floor(100 + Math.random()*900) + "-" +
-          Math.floor(1000 + Math.random()*9000);
-    localStorage.setItem("userNumber", num);
-  }
-  numEl.textContent = num;
+  <!-- Modal do perfil -->
+  <div id="profile-modal">
+    <div class="modal-content">
+      <img id="modal-profile-img" src="" alt="Foto do perfil" />
+      <div><strong id="modal-profile-number-label">Número:</strong> <span id="modal-profile-number"></span></div>
+      <textarea id="modal-bio" placeholder="Digite sua bio..."></textarea>
+      <button class="close-btn">Fechar</button>
+    </div>
+  </div>
 
-  // Ação de entrar
-  document.getElementById("enter").onclick = () => {
-    localStorage.setItem("entered", "true");
-    showApp();
-  };
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    const translations = {
+      pt: {
+        welcome: "Bem-vindo ao ObriChat!",
+        enter: "Entrar",
+        addContact: "Adicionar Contato",
+        placeholderName: "Nome do contato",
+        placeholderNumber: "Número (555) 123-4567",
+        typing: "Digitando...",
+        online: "Online",
+        offline: "Offline",
+        numberLabel: "Número:",
+        bioPlaceholder: "Digite sua bio...",
+        close: "Fechar",
+        send: "Enviar",
+        welcomeYourNumber: "Seu número gerado é:"
+      },
+      en: {
+        welcome: "Welcome to ObriChat!",
+        enter: "Enter",
+        addContact: "Add Contact",
+        placeholderName: "Contact name",
+        placeholderNumber: "Number (555) 123-4567",
+        typing: "Typing...",
+        online: "Online",
+        offline: "Offline",
+        numberLabel: "Number:",
+        bioPlaceholder: "Write your bio...",
+        close: "Close",
+        send: "Send",
+        welcomeYourNumber: "Your generated number is:"
+      },
+      it: {
+        welcome: "Benvenuto su ObriChat!",
+        enter: "Entra",
+        addContact: "Aggiungi Contatto",
+        placeholderName: "Nome contatto",
+        placeholderNumber: "Numero (555) 123-4567",
+        typing: "Sta scrivendo...",
+        online: "Online",
+        offline: "Offline",
+        numberLabel: "Numero:",
+        bioPlaceholder: "Scrivi la tua bio...",
+        close: "Chiudi",
+        send: "Invia",
+        welcomeYourNumber: "Il tuo numero generato è:"
+      },
+      ko: {
+        welcome: "ObriChat에 오신 것을 환영합니다!",
+        enter: "입장",
+        addContact: "연락처 추가",
+        placeholderName: "연락처 이름",
+        placeholderNumber: "번호 (555) 123-4567",
+        typing: "입력 중...",
+        online: "온라인",
+        offline: "오프라인",
+        numberLabel: "번호:",
+        bioPlaceholder: "소개를 작성하세요...",
+        close: "닫기",
+        send: "보내기",
+        welcomeYourNumber: "생성된 번호:"
+      },
+      fr: {
+        welcome: "Bienvenue sur ObriChat !",
+        enter: "Entrer",
+        addContact: "Ajouter un contact",
+        placeholderName: "Nom du contact",
+        placeholderNumber: "Numéro (555) 123-4567",
+        typing: "En train d'écrire...",
+        online: "En ligne",
+        offline: "Hors ligne",
+        numberLabel: "Numéro :",
+        bioPlaceholder: "Écrivez votre bio...",
+        close: "Fermer",
+        send: "Envoyer",
+        welcomeYourNumber: "Votre numéro généré est :"
+      }
+    };
 
-  // Exibe o app se já entrou
-  function showApp(){
-    if (localStorage.getItem("entered") === "true") {
-      document.getElementById("welcome").style.display = "none";
-      document.getElementById("app").style.display = "flex";
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3WVnTHGCTOO2jIU_RlDrN2cCedq18tRI",
+      authDomain: "obrichat-4c631.firebaseapp.com",
+      databaseURL: "https://obrichat-4c631-default-rtdb.firebaseio.com",
+      projectId: "obrichat-4c631",
+      storageBucket: "obrichat-4c631.appspot.com",
+      messagingSenderId: "587921807769",
+      appId: "1:587921807769:web:386f5370030c1dc8931b08"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Função para aplicar traduções na UI
+    function applyTranslations(lang) {
+      const t = translations[lang];
+      document.getElementById("welcome-text").textContent = t.welcome;
+      document.getElementById("enter-btn").textContent = t.enter;
+      document.getElementById("add-contact-btn").textContent = t.addContact;
+      document.getElementById("contact-name").placeholder = t.placeholderName;
+      document.getElementById("dest-number").placeholder = t.placeholderNumber;
+      document.getElementById("msg-input").placeholder = t.placeholderNumber;
+      document.getElementById("modal-bio").placeholder = t.bioPlaceholder;
+      document.getElementById("modal-profile-number-label").textContent = t.numberLabel;
+      document.querySelector(".close-btn").textContent = t.close;
+      document.getElementById("send-btn").textContent = t.send;
+      document.querySelector("#welcome-screen p:nth-child(2)").textContent = t.welcomeYourNumber;
     }
-  }
-  showApp();
-</script>
 
+    // Detecta idioma do navegador ou usa pt padrão
+    let userLang = navigator.language || navigator.userLanguage;
+    userLang = userLang.slice(0,2);
+    if [❶](code://python)
+           if (!translations[userLang]) userLang = "pt";
+    document.getElementById("language-selector").value = userLang;
+    applyTranslations(userLang);
+
+    // Atualiza idioma ao mudar seleção
+    document.getElementById("language-selector").addEventListener("change", e => {
+      userLang = e.target.value;
+      applyTranslations(userLang);
+      refreshContactsUI();
+      refreshChatHeader();
+    });
+
+    // Gerar número random
+    function generateNumber() {
+      // Exemplo: (555) 000-0000
+      const area = 555;
+      const n1 = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+      const n2 = Math.floor(Math.random() * 9000) + 1000; 
+      return `(${area}) ${n1}-${n2}`;
+    }
+
+    let userNumber = localStorage.getItem("userNumber");
+    if (!userNumber) {
+      userNumber = generateNumber();
+      localStorage.setItem("userNumber", userNumber);
+    }
+    document.getElementById("user-number-display").textContent = userNumber;
+
+    // Estado atual
+    let currentContactNumber = null;
+    let contacts = {};
+    let profiles = {};
+    let messages = {};
+
+    // Ao clicar em entrar
+    document.getElementById("enter-btn").addEventListener("click", () => {
+      document.getElementById("welcome-screen").style.display = "none";
+      document.getElementById("app-container").style.display = "flex";
+
+      // Mostrar perfil e número
+      updateProfileUI();
+
+      // Iniciar escuta no Firebase
+      startFirebaseListeners();
+
+      // Mostrar input mensagem somente após escolher contato
+      document.getElementById("input-area").style.display = "none";
+    });
+
+    // Atualiza perfil UI
+    function updateProfileUI() {
+      // Foto default gerada (https://robohash.org)
+      const profileImg = localStorage.getItem("profileImg") || `https://robohash.org/${encodeURIComponent(userNumber)}.png?set=set5`;
+      const bio = localStorage.getItem("profileBio") || "";
+      document.getElementById("profile-img").src = profileImg;
+      document.getElementById("profile-number").textContent = userNumber;
+      document.getElementById("modal-profile-img").src = profileImg;
+      document.getElementById("modal-profile-number").textContent = userNumber;
+      document.getElementById("modal-bio").value = bio;
+    }
+
+    // Modal perfil abrir/fechar
+    document.getElementById("profile").addEventListener("click", () => {
+      document.getElementById("profile-modal").style.display = "flex";
+    });
+    document.querySelector("#profile-modal .close-btn").addEventListener("click", () => {
+      document.getElementById("profile-modal").style.display = "none";
+      // Salvar bio localmente
+      localStorage.setItem("profileBio", document.getElementById("modal-bio").value.trim());
+    });
+
+    // Adicionar contato
+    document.getElementById("add-contact-btn").addEventListener("click", () => {
+      const name = document.getElementById("contact-name").value.trim();
+      const number = document.getElementById("dest-number").value.trim();
+      if (!name || !number) {
+        alert("Preencha nome e número do contato!");
+        return;
+      }
+      if (number === userNumber) {
+        alert("Não pode adicionar seu próprio número!");
+        return;
+      }
+      contacts[number] = { name, number, photo: `https://robohash.org/${encodeURIComponent(number)}.png?set=set5` };
+      saveContactsToStorage();
+      refreshContactsUI();
+      document.getElementById("contact-name").value = "";
+      document.getElementById("dest-number").value = "";
+    });
+
+    // Salva contatos no localStorage
+    function saveContactsToStorage() {
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+    }
+
+    // Carrega contatos do localStorage
+    function loadContactsFromStorage() {
+      const c = localStorage.getItem("contacts");
+      if (c) contacts = JSON.parse(c);
+    }
+
+    // Atualiza lista contatos UI
+    function refreshContactsUI() {
+      const list = document.getElementById("contacts-list");
+      list.innerHTML = "";
+      for (const num in contacts) {
+        const contact = contacts[num];
+        const btn = document.createElement("button");
+        btn.innerHTML = `<img src="${contact.photo}" alt="Foto"/><span>${contact.name} (${contact.number})</span>`;
+        btn.onclick = () => {
+          openChatWith(num);
+        };
+        list.appendChild(btn);
+      }
+    }
+
+    // Abre chat com contato selecionado
+    function openChatWith(number) {
+      currentContactNumber = number;
+      document.getElementById("input-area").style.display = "flex";
+      refreshChatHeader();
+      refreshChatMessages();
+    }
+
+    // Atualiza cabeçalho do chat
+    function refreshChatHeader() {
+      const header = document.getElementById("header");
+      if (!currentContactNumber) {
+        header.textContent = "ObriChat";
+        document.getElementById("sub-header").textContent = "";
+        return;
+      }
+      const contact = contacts[currentContactNumber];
+      header.textContent = contact ? contact.name : currentContactNumber;
+      // Status online/offline (simulado)
+      document.getElementById("sub-header").textContent = translations[userLang].online;
+    }
+
+    // Enviar mensagem
+    document.getElementById("send-btn").addEventListener("click", () => {
+      sendMessage();
+    });
+    document.getElementById("msg-input").addEventListener("keypress", e => {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      if (!currentContactNumber) return;
+      const input = document.getElementById("msg-input");
+      const text = input.value.trim();
+      if (!text) return;
+      const now = Date.now();
+      const msgId = db.ref().push().key;
+      const messageData = {
+        from: userNumber,
+        to: currentContactNumber,
+        text: text,
+        timestamp: now
+      };
+      // Salva no Firebase, chat entre os dois números (caminho ordenado para os dois lados)
+      const chatId = getChatId(userNumber, currentContactNumber);
+      db.ref(`messages/${chatId}/${msgId}`).set(messageData);
+      input.value = "";
+    }
+
+    // Gera id de chat fixo e ordenado (ex: "(555)123-4567-(555)234-5678")
+    function getChatId(a, b) {
+      return [a, b].sort().join("-");
+    }
+
+    // Escuta mensagens Firebase para o chat atual
+    function listenMessages(chatId) {
+      const chatRef = db.ref(`messages/${chatId}`);
+      chatRef.off(); // Remove listener antigo
+      chatRef.on("value", snapshot => {
+        messages[chatId] = snapshot.val() || {};
+        if (chatId === getChatId(userNumber, currentContactNumber)) {
+          refreshChatMessages();
+        }
+      });
+    }
+
+    // Atualiza mensagens na UI
+    function refreshChatMessages() {
+      const chatDiv = document.getElementById("chat");
+      chatDiv.innerHTML = "";
+      if (!currentContactNumber) return;
+      const chatId = getChatId(userNumber, currentContactNumber);
+      const msgs = messages[chatId] || {};
+      const sortedMsgs = Object.values(msgs).sort((a,b) => a.timestamp - b.timestamp);
+      sortedMsgs.forEach(m => {
+        const div = document.createElement("div");
+        div.classList.add("msg");
+        div.classList.add(m.from === userNumber ? "me" : "other");
+        div.textContent = m.text;
+        chatDiv.appendChild(div);
+      });
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+      listenMessages(chatId);
+    }
+
+    // Inicia escuta no Firebase para contatos online (simulado para status)
+    function startFirebaseListeners() {
+      loadContactsFromStorage();
+      refreshContactsUI();
+      // Pode adicionar aqui escuta para perfis e mensagens
+    }
+
+    // Carrega foto e bio do perfil se tiver (já feita no updateProfileUI)
+
+    // Ao carregar página, já preenche contatos do localStorage
+    loadContactsFromStorage();
+
+  </script>
 </body>
 </html>
